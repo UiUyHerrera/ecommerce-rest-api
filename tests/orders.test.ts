@@ -46,6 +46,23 @@ describe('orders', () => {
     expect(res.body.error).toContain('Not enough stock');
   });
 
+  it('sells the last unit only once when two orders arrive together', async () => {
+    const product = await createProduct({ name: 'Last Unit Item', price: 10, stock: 1 });
+    const [first, second] = await Promise.all([createNormalUser(), createNormalUser()]);
+
+    const order = (token: string) =>
+      request(app)
+        .post('/orders')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ items: [{ productId: product.id, quantity: 1 }] });
+
+    const results = await Promise.all([order(first.token), order(second.token)]);
+
+    expect(results.map((res) => res.status).sort()).toEqual([201, 400]);
+    const updated = await prisma.product.findUnique({ where: { id: product.id } });
+    expect(updated!.stock).toBe(0);
+  });
+
   it('rejects an order without a token', async () => {
     const product = await createProduct({ name: 'Auth Item', price: 10, stock: 2 });
 

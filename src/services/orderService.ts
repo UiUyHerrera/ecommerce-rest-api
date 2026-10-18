@@ -28,11 +28,16 @@ export async function createOrder(userId: string, items: OrderItemInput[]) {
       total = total.plus(product.price.times(item.quantity));
     }
 
+    // Two orders can pass the check above at the same time, so the decrement only
+    // applies while there is still enough stock. Postgres re-checks it on the locked row.
     for (const item of items) {
-      await tx.product.update({
-        where: { id: item.productId },
+      const { count } = await tx.product.updateMany({
+        where: { id: item.productId, stock: { gte: item.quantity } },
         data: { stock: { decrement: item.quantity } },
       });
+      if (count === 0) {
+        throw new HttpError(400, `Not enough stock for ${productMap.get(item.productId)!.name}`);
+      }
     }
 
     return tx.order.create({

@@ -54,7 +54,7 @@ tests/           tests de integración
 Algunas decisiones:
 
 - Los precios y totales son `Decimal` en la base y en el código, nunca `float`.
-- Crear un pedido es una sola transacción: se verifican los productos, se descuenta el stock y se guarda el pedido con el precio de ese momento. Cancelarlo también, y devuelve el stock.
+- Crear un pedido es una sola transacción: se verifican los productos, se descuenta el stock y se guarda el pedido con el precio de ese momento. El descuento es un update condicional (`stock >= cantidad`), así dos pedidos simultáneos no pueden vender la misma última unidad. Cancelar un pedido también es una transacción, y devuelve el stock.
 - Helmet, CORS y un límite de requests por IP vienen activados por defecto.
 
 ## Tests
@@ -63,4 +63,4 @@ Algunas decisiones:
 npm test
 ```
 
-Son tests de integración contra una base real, la de `TEST_DATABASE_URL`, que se limpia antes de cada corrida. Cubren autenticación, productos, pedidos y estadísticas.
+Son tests de integración contra una base real, la de `TEST_DATABASE_URL`, que se limpia antes de cada corrida. Cubren autenticación, productos, pedidos (incluido el caso de dos compras simultáneas de la última unidad) y estadísticas. GitHub Actions los corre contra un PostgreSQL 16 en cada push a main y en cada pull request.
