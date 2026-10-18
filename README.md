@@ -1,14 +1,14 @@
 # ecommerce-rest-api
 
-Backend de una tienda online: cuentas con JWT, roles de cliente y administrador, catálogo con stock, pedidos y estadísticas para el admin. En `public/` hay una página chica que consume la API, para probarla sin Postman.
+The backend of an online shop: JWT accounts, customer and admin roles, a catalog with stock, orders, and stats for the admin. `public/` has a small page that uses the API, so you can try it without Postman.
 
-![Página de prueba: catálogo, carrito y pedidos del usuario](docs/capturas/tienda.png)
+![Demo page: catalog, cart and the user's orders](docs/capturas/tienda.png)
 
-Está hecho con Node.js, TypeScript y Express. Los datos van en PostgreSQL a través de Prisma, las entradas se validan con Zod y los tests usan Vitest con Supertest.
+It's built with Node.js, TypeScript and Express. Data lives in PostgreSQL through Prisma, input is validated with Zod, and tests use Vitest with Supertest.
 
-## Levantarlo
+## Running it
 
-Necesitás Node.js 20 o más nuevo y Docker.
+You need Node.js 20 or newer and Docker.
 
 ```bash
 npm install
@@ -19,47 +19,47 @@ npm run db:seed
 npm run dev
 ```
 
-La API queda en http://localhost:3000, la página de prueba en la raíz y Swagger UI en `/docs`. El seed crea una cuenta de administrador y una de cliente; los datos están en `prisma/seed.ts`.
+The API runs at http://localhost:3000, the demo page at the root and Swagger UI at `/docs`. The seed creates an admin account and a customer account; their details are in `prisma/seed.ts`.
 
-`JWT_SECRET` es obligatoria: si falta en `.env`, el servidor no arranca.
+`JWT_SECRET` is required: without it in `.env`, the server won't start.
 
 ## Endpoints
 
-| Ruta | Qué hace | Acceso |
+| Route | What it does | Access |
 |---|---|---|
-| `POST /auth/register`, `POST /auth/login` | Crear cuenta y obtener el token | Público |
-| `GET /auth/me` | Datos del usuario logueado | Logueado |
-| `GET /products`, `GET /products/:id` | Catálogo, con filtros y paginación | Público |
-| `POST`, `PATCH`, `DELETE /products` | Alta, edición y baja de productos | Admin |
-| `GET /orders`, `GET /orders/:id` | Pedidos propios (el admin ve todos) | Logueado |
-| `POST /orders` | Crear un pedido | Logueado |
-| `PATCH /orders/:id/cancel` | Cancelar un pedido y devolver el stock | Dueño o admin |
-| `GET /users`, `GET /stats` | Usuarios y estadísticas de la tienda | Admin |
+| `POST /auth/register`, `POST /auth/login` | Create an account and get a token | Public |
+| `GET /auth/me` | The logged-in user | Logged in |
+| `GET /products`, `GET /products/:id` | Catalog, with filters and pagination | Public |
+| `POST`, `PATCH`, `DELETE /products` | Create, edit and delete products | Admin |
+| `GET /orders`, `GET /orders/:id` | Your own orders (admins see all of them) | Logged in |
+| `POST /orders` | Place an order | Logged in |
+| `PATCH /orders/:id/cancel` | Cancel an order and put the stock back | Owner or admin |
+| `GET /users`, `GET /stats` | Users and shop stats | Admin |
 
-El contrato completo está en `docs/openapi.json`.
+The full contract is in `docs/openapi.json`.
 
-![Swagger UI con los endpoints de autenticación y productos](docs/capturas/swagger.png)
+![Swagger UI with the auth and products endpoints](docs/capturas/swagger.png)
 
-## Cómo está armado
+## How it's put together
 
-Cada recurso pasa por las mismas capas: la ruta valida el request con su esquema Zod, el controlador traduce HTTP y el servicio tiene la lógica y habla con Prisma. Los errores se tiran como `HttpError` y un único middleware los convierte en la respuesta.
+Every resource goes through the same layers: the route validates the request with its Zod schema, the controller deals with HTTP, and the service holds the logic and talks to Prisma. Errors are thrown as `HttpError`, and a single middleware turns them into the response.
 
 ```
 src/
-  routes/        rutas y validación
-  controllers/   request y response
-  services/      lógica de negocio y Prisma
-  schemas/       esquemas Zod
-  middlewares/   auth, admin, validación y errores
-prisma/          esquema, migraciones y seed
-tests/           tests de integración
+  routes/        routes and validation
+  controllers/   request and response
+  services/      business logic and Prisma
+  schemas/       Zod schemas
+  middlewares/   auth, admin, validation and errors
+prisma/          schema, migrations and seed
+tests/           integration tests
 ```
 
-Algunas decisiones:
+Some decisions:
 
-- Los precios y totales son `Decimal` en la base y en el código, nunca `float`.
-- Crear un pedido es una sola transacción: se verifican los productos, se descuenta el stock y se guarda el pedido con el precio de ese momento. El descuento es un update condicional (`stock >= cantidad`), así dos pedidos simultáneos no pueden vender la misma última unidad. Cancelar un pedido también es una transacción, y devuelve el stock.
-- Helmet, CORS y un límite de requests por IP vienen activados por defecto.
+- Prices and totals are `Decimal` in the database and in the code, never `float`.
+- Placing an order is a single transaction: the products are checked, the stock is taken out, and the order is saved with the price at that moment. The stock goes down with a conditional update (`stock >= quantity`), so two simultaneous orders can't sell the same last unit. Cancelling is also a transaction, and it puts the stock back.
+- Helmet, CORS and a per-IP request limit are on by default.
 
 ## Tests
 
@@ -67,4 +67,4 @@ Algunas decisiones:
 npm test
 ```
 
-Son tests de integración contra una base real, la de `TEST_DATABASE_URL`, que se limpia antes de cada corrida. Cubren autenticación, productos, pedidos (incluido el caso de dos compras simultáneas de la última unidad) y estadísticas. GitHub Actions los corre contra un PostgreSQL 16 en cada push a main y en cada pull request.
+They're integration tests against a real database, the one in `TEST_DATABASE_URL`, which is wiped before every run. They cover auth, products, orders (including two people buying the last unit at the same time) and stats. GitHub Actions runs them against PostgreSQL 16 on every push to main and every pull request.
