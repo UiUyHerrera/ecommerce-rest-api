@@ -2,6 +2,8 @@
 
 Backend de una tienda online: cuentas con JWT, roles de cliente y administrador, catálogo con stock, pedidos y estadísticas para el admin. En `public/` hay una página chica que consume la API, para probarla sin Postman.
 
+![Página de prueba: catálogo, carrito y pedidos del usuario](docs/capturas/tienda.png)
+
 Está hecho con Node.js, TypeScript y Express. Los datos van en PostgreSQL a través de Prisma, las entradas se validan con Zod y los tests usan Vitest con Supertest.
 
 ## Levantarlo
@@ -35,6 +37,8 @@ La API queda en http://localhost:3000, la página de prueba en la raíz y Swagge
 | `GET /users`, `GET /stats` | Usuarios y estadísticas de la tienda | Admin |
 
 El contrato completo está en `docs/openapi.json`.
+
+![Swagger UI con los endpoints de autenticación y productos](docs/capturas/swagger.png)
 
 ## Cómo está armado
 

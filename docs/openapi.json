@@ -1,16 +1,16 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Backend REST API",
-    "description": "API REST de una tienda con usuarios, productos y pedidos. Autenticacion por JWT, validacion con Zod y PostgreSQL.",
+    "title": "E-commerce REST API",
+    "description": "API REST de una tienda con usuarios, productos y pedidos. Autenticación por JWT, validación con Zod y PostgreSQL.",
     "version": "1.0.0"
   },
   "servers": [
     { "url": "http://localhost:3000", "description": "Servidor local" }
   ],
   "tags": [
-    { "name": "auth", "description": "Registro, login y sesion actual" },
-    { "name": "products", "description": "Productos de la tienda (publicos para leer)" },
+    { "name": "auth", "description": "Registro, login y sesión actual" },
+    { "name": "products", "description": "Productos de la tienda (públicos para leer)" },
     { "name": "orders", "description": "Pedidos de los usuarios" },
     { "name": "users", "description": "Usuarios del sistema" }
   ],
@@ -42,7 +42,7 @@
     "/auth/login": {
       "post": {
         "tags": ["auth"],
-        "summary": "Inicia sesion y devuelve un token",
+        "summary": "Inicia sesión y devuelve un token",
         "requestBody": {
           "required": true,
           "content": {
@@ -65,7 +65,7 @@
     "/auth/me": {
       "get": {
         "tags": ["auth"],
-        "summary": "Devuelve el usuario de la sesion actual",
+        "summary": "Devuelve el usuario de la sesión actual",
         "security": [{ "bearerAuth": [] }],
         "responses": {
           "200": {
@@ -81,7 +81,7 @@
     "/products": {
       "get": {
         "tags": ["products"],
-        "summary": "Lista productos con filtros y paginacion",
+        "summary": "Lista productos con filtros y paginación",
         "parameters": [
           { "$ref": "#/components/parameters/PageParam" },
           { "$ref": "#/components/parameters/LimitParam" },
@@ -97,28 +97,28 @@
             "in": "query",
             "required": false,
             "schema": { "type": "number" },
-            "description": "Precio minimo"
+            "description": "Precio mínimo"
           },
           {
             "name": "maxPrice",
             "in": "query",
             "required": false,
             "schema": { "type": "number" },
-            "description": "Precio maximo"
+            "description": "Precio máximo"
           },
           {
             "name": "sort",
             "in": "query",
             "required": false,
             "schema": { "type": "string", "enum": ["name", "price", "createdAt", "updatedAt"] },
-            "description": "Campo de ordenacion"
+            "description": "Campo de ordenación"
           },
           {
             "name": "order",
             "in": "query",
             "required": false,
             "schema": { "type": "string", "enum": ["asc", "desc"] },
-            "description": "Direccion de la ordenacion"
+            "description": "Dirección de la ordenación"
           }
         ],
         "responses": {
@@ -412,14 +412,14 @@
         "in": "query",
         "required": false,
         "schema": { "type": "integer", "minimum": 1, "default": 1 },
-        "description": "Pagina"
+        "description": "Página"
       },
       "LimitParam": {
         "name": "limit",
         "in": "query",
         "required": false,
         "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 10 },
-        "description": "Resultados por pagina"
+        "description": "Resultados por página"
       }
     },
     "responses": {
@@ -430,7 +430,7 @@
         }
       },
       "Unauthorized": {
-        "description": "Falta un token valido o las credenciales son incorrectas",
+        "description": "Falta un token válido o las credenciales son incorrectas",
         "content": {
           "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } }
         }
